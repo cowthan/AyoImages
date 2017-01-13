@@ -1,15 +1,18 @@
 apply plugin: 'com.android.application'
 
+Properties configer = new Properties()
+configer.load(new FileInputStream(file("../config.properties")))
+
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion Integer.valueOf(configer['compileSdkVersion'])
+    buildToolsVersion configer['buildToolsVersion']
 
     defaultConfig {
         applicationId "com.lzy.imagepickerdemo"
-        minSdkVersion 14
-        targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion Integer.valueOf(configer['minSdkVersion'])
+        targetSdkVersion Integer.valueOf(configer['targetSdkVersion'])
+        versionCode Integer.valueOf(configer['versionCode'])
+        versionName configer['versionName']
     }
     buildTypes {
         release {
@@ -17,12 +20,42 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+            java.srcDirs = ['src/main/java']
+        }
+    }
+
+    productFlavors {
+        google {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "google"]
+        }
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'libs', '../libs'
+    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile configer['lib_appcompat']
+    compile configer['lib_recyclerview']
+    compile configer['lib_design']
+    compile configer['lib_cardview']
+
+
+    compile(name: 'ayo-component', ext: 'aar')
+    compile(name: 'ayo-menu', ext: 'aar')
+    compile(name: 'ayo-lang', ext: 'aar')
+    compile(name: 'ayo-eventbus', ext: 'aar')
+    compile(name: 'ayo-db', ext: 'aar')
+    compile(name: 'ayo-anim', ext: 'aar')
+    compile(name: 'ayo-ui-notify', ext: 'aar')
 
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
@@ -32,4 +65,7 @@ dependencies {
     compile 'com.lzy.widget:view-core:0.2.1'
     //    compile 'com.lzy.widget:imagepicker:+'
     compile project(':imagepicker')
+    compile project(':ayo-img-imageloader')
+    compile project(':ayo-img-mediachooser')
+    compile project(':ayo-img-squarecamera')
 }

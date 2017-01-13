@@ -7,6 +7,11 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import org.ayo.Ayo;
+import org.ayo.component.core.Core;
+import org.ayo.file.Files;
+import org.ayo.imageloader.VanGogh;
+import org.ayo.notify.AyoUI_notify;
 import org.xutils.image.ImageOptions;
 import org.xutils.x;
 
@@ -19,7 +24,9 @@ import org.xutils.x;
  * 修订历史：
  * ================================================
  */
-public class GApp extends Application {
+public class App extends Application {
+
+    public static Application app;
 
     public static DisplayImageOptions imageLoaderOptions = new DisplayImageOptions.Builder()//
             .showImageOnLoading(R.mipmap.default_image)         //设置图片在下载期间显示的图片
@@ -43,5 +50,19 @@ public class GApp extends Application {
 
         ImageLoader.getInstance().init(config);     //UniversalImageLoader初始化
         x.Ext.init(this);                           //xUtils3初始化
+
+        app = this;
+        Core.init(this);
+
+        //初始化Ayo SDK
+        Ayo.init(this, "/ayoo/", true, true);
+        Ayo.debug = true;
+        AyoUI_notify.init(this);
+
+        //初始化ImageLoader
+        VanGogh.initImageBig(R.mipmap.ic_launcher);
+        VanGogh.initImageMiddle(R.mipmap.ic_launcher);
+        VanGogh.initImageSmall(R.mipmap.ic_launcher);
+        VanGogh.init(this, Files.path.getDirInRoot("uil"));
     }
 }
