@@ -16,29 +16,23 @@
 
 package com.learnncode.mediachooser.fragment;
 
-import java.util.ArrayList;
-
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Images.ImageColumns;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.learnncode.mediachooser.BucketEntry;
+import com.learnncode.mediachooser.ImageLang;
 import com.learnncode.mediachooser.MediaChooser;
-import com.learnncode.mediachooser.MediaChooserConstants;
 import com.learnncode.mediachooser.R;
 import com.learnncode.mediachooser.activity.HomeFragmentActivity;
 import com.learnncode.mediachooser.adapter.BucketGridAdapter;
+
+import java.util.List;
 /**
  * 选择目录，并返回选择的目录
  * @author Administrator
@@ -46,23 +40,10 @@ import com.learnncode.mediachooser.adapter.BucketGridAdapter;
  */
 public class BucketImageFragmentForDirPicker extends Fragment{
 
-	// The indices should match the following projections.
-	private final int INDEX_BUCKET_ID     = 0;
-	private final int INDEX_BUCKET_NAME   = 1;
-	private final int INDEX_BUCKET_URL    = 2;
-
-	private static final String[] PROJECTION_BUCKET = {
-		ImageColumns.BUCKET_ID,
-		ImageColumns.BUCKET_DISPLAY_NAME,
-		ImageColumns.DATA};
 
 	private View mView;
 	private GridView mGridView;
 	private BucketGridAdapter mBucketAdapter;
-
-	private Cursor mCursor;
-
-
 
 	public BucketImageFragmentForDirPicker(){
 		setRetainInstance(true);
@@ -87,44 +68,34 @@ public class BucketImageFragmentForDirPicker extends Fragment{
 
 
 	private void init(){
-		final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-		 mCursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, PROJECTION_BUCKET, null, null, orderBy + " DESC");
-		ArrayList<BucketEntry> buffer = new ArrayList<BucketEntry>();
-		try {
-			while (mCursor.moveToNext()) {
-				BucketEntry entry = new BucketEntry(
-						mCursor.getInt(INDEX_BUCKET_ID),
-						mCursor.getString(INDEX_BUCKET_NAME),mCursor.getString(INDEX_BUCKET_URL));
-
-				if (! buffer.contains(entry)) {
-					buffer.add(entry);
-				}
+		List<ImageLang.Dir> dirs = ImageLang.getImageDirs(getActivity(), new ImageLang.DirFilter() {
+			@Override
+			public boolean access(ImageLang.Dir dir) {
+				return true;
 			}
-
-			if(mCursor.getCount() > 0){
-				mBucketAdapter = new BucketGridAdapter(getActivity(), 0, buffer, false);
-				mGridView.setAdapter(mBucketAdapter);
-			}else{
-				Toast.makeText(getActivity(), getActivity().getString(R.string.no_media_file_available), Toast.LENGTH_SHORT).show();
-			}
-
-			mGridView.setOnItemClickListener(new OnItemClickListener() {
-
-				@Override
-				public void onItemClick(AdapterView<?> adapter, View view,
-						int position, long id) {
-					
-					
-					BucketEntry bucketEntry  = (BucketEntry)adapter.getItemAtPosition(position);
-					Intent selectedDirIntent = new Intent(getActivity(),HomeFragmentActivity.class);
-					selectedDirIntent.putExtra("name", bucketEntry.bucketName);
-					getActivity().setResult(MediaChooser.RESULT_OK, selectedDirIntent);
-				}
-			});
-
-		} finally {
-			mCursor.close();
+		});
+		if(dirs != null && dirs.size() > 0){
+			mBucketAdapter = new BucketGridAdapter(getActivity(), 0, dirs, false);
+			mGridView.setAdapter(mBucketAdapter);
+		}else{
+			Toast.makeText(getActivity(), getActivity().getString(R.string.no_media_file_available), Toast.LENGTH_SHORT).show();
 		}
+
+		mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapter, View view,
+									int position, long id) {
+
+				ImageLang.Dir bucketEntry  = (ImageLang.Dir)adapter.getItemAtPosition(position);
+				Intent selectImageIntent = new Intent(getActivity(),HomeFragmentActivity.class);
+				selectImageIntent.putExtra("name", bucketEntry.bucketName);
+				System.out.println("选中目录--" + bucketEntry.bucketName);
+				selectImageIntent.putExtra("image", true);
+				selectImageIntent.putExtra("isFromBucket", true);
+				getActivity().startActivityForResult(selectImageIntent, MediaChooser.REQ_PICK_IMAGE);
+			}
+		});
 	}
 
 	public BucketGridAdapter getAdapter() {
