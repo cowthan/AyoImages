@@ -176,7 +176,7 @@ public class ImageLang {
         } finally {
             mImageCursor.close();
         }
-        return new ArrayList<>();
+        return list;
     }
 
     public static List<MediaInfo> getVedios(Context context, String root, final ImageFilter imageFilter){
@@ -213,6 +213,6 @@ public class ImageLang {
         } finally {
             mImageCursor.close();
         }
-        return new ArrayList<>();
+        return list;
     }
 }
