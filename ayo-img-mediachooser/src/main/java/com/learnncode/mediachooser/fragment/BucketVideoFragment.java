@@ -19,6 +19,7 @@
 package com.learnncode.mediachooser.fragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -35,6 +36,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.learnncode.mediachooser.BucketEntry;
+import com.learnncode.mediachooser.ImageLang;
 import com.learnncode.mediachooser.MediaChooserConstants;
 import com.learnncode.mediachooser.R;
 import com.learnncode.mediachooser.activity.HomeFragmentActivity;
@@ -82,46 +84,34 @@ public class BucketVideoFragment extends Fragment{
 
 
 	private void init(){
-		final String orderBy = MediaStore.Video.Media.DATE_TAKEN;
-		mCursor = getActivity().getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, PROJECTION_BUCKET, null, null, orderBy + " DESC");
-		ArrayList<BucketEntry> buffer = new ArrayList<BucketEntry>();
-		try {
-			while (mCursor.moveToNext()) {
-				BucketEntry entry = new BucketEntry(
-						mCursor.getInt(INDEX_BUCKET_ID),
-						mCursor.getString(INDEX_BUCKET_NAME),mCursor.getString(INDEX_BUCKET_URL));
-
-
-
-				if (! buffer.contains(entry)) {
-					buffer.add(entry);
-				}
+		List<ImageLang.Dir> dirs = ImageLang.getImageDirs(getActivity(), new ImageLang.DirFilter() {
+			@Override
+			public boolean access(ImageLang.Dir dir) {
+				return true;
 			}
-			if(mCursor.getCount() > 0){
-				mBucketAdapter = new BucketGridAdapter(getActivity(), 0, buffer, true);
-				mBucketAdapter.bucketVideoFragment = this;
-				mGridView.setAdapter(mBucketAdapter);
-			}else{
-				Toast.makeText(getActivity(), getActivity().getString(R.string.no_media_file_available), Toast.LENGTH_SHORT).show();
-			}
-			mGridView.setOnItemClickListener(new OnItemClickListener() {
-
-				@Override
-				public void onItemClick(AdapterView<?> adapter, View view,
-						int position, long id) {
-
-					BucketEntry bucketEntry = (BucketEntry)adapter.getItemAtPosition(position);
-					Intent selectImageIntent = new Intent(getActivity(),HomeFragmentActivity.class);
-					selectImageIntent.putExtra("name", bucketEntry.bucketName);
-					selectImageIntent.putExtra("isFromBucket", true);
-					getActivity().startActivityForResult(selectImageIntent, MediaChooserConstants.BUCKET_SELECT_VIDEO_CODE);
-
-				}
-			});
-
-		} finally {
-			mCursor.close();
+		});
+		if(dirs != null && dirs.size() > 0){
+			mBucketAdapter = new BucketGridAdapter(getActivity(), 0, dirs, true);
+			mBucketAdapter.bucketVideoFragment = this;
+			mGridView.setAdapter(mBucketAdapter);
+		}else{
+			Toast.makeText(getActivity(), getActivity().getString(R.string.no_media_file_available), Toast.LENGTH_SHORT).show();
 		}
+		mGridView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapter, View view,
+					int position, long id) {
+
+				BucketEntry bucketEntry = (BucketEntry)adapter.getItemAtPosition(position);
+				Intent selectImageIntent = new Intent(getActivity(),HomeFragmentActivity.class);
+				selectImageIntent.putExtra("name", bucketEntry.bucketName);
+				selectImageIntent.putExtra("isFromBucket", true);
+				getActivity().startActivityForResult(selectImageIntent, MediaChooserConstants.BUCKET_SELECT_VIDEO_CODE);
+
+			}
+		});
+
 	}
 
 	public BucketGridAdapter getAdapter() {

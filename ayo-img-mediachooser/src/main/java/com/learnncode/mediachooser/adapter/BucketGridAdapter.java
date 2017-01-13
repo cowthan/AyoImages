@@ -34,20 +34,20 @@ import com.learnncode.mediachooser.async.MediaAsync;
 import com.learnncode.mediachooser.async.VideoLoadAsync;
 import com.learnncode.mediachooser.fragment.BucketVideoFragment;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class BucketGridAdapter extends ArrayAdapter<ImageLang.Dir> {
 
 	public BucketVideoFragment bucketVideoFragment; 
 
 	private Context mContext;
-	private ArrayList<ImageLang.Dir> mBucketEntryList;
+	private List<ImageLang.Dir> mBucketEntryList;
 	private boolean mIsFromVideo;
 	private int mWidth;
 	LayoutInflater viewInflater;
 	
 
-	public BucketGridAdapter(Context context, int resource, ArrayList<ImageLang.Dir> categories, boolean isFromVideo) {
+	public BucketGridAdapter(Context context, int resource, List<ImageLang.Dir> categories, boolean isFromVideo) {
 		super(context, resource, categories);
 		mBucketEntryList = categories;
 		mContext         = context;

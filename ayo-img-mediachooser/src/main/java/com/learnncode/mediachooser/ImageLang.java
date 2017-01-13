@@ -14,10 +14,17 @@ import java.util.List;
 
 public class ImageLang {
 
-    private static final String[] PROJECTION_BUCKET = {
+    private static final String[] PROJECTION_BUCKET_IMG = {
             MediaStore.Images.ImageColumns.BUCKET_ID,
             MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
             MediaStore.Images.ImageColumns.DATA
+    };
+
+
+    private static final String[] PROJECTION_BUCKET_VEDIO = {
+            MediaStore.Video.VideoColumns.BUCKET_ID,
+            MediaStore.Video.VideoColumns.BUCKET_DISPLAY_NAME,
+            MediaStore.Video.VideoColumns.DATA,
     };
 
     private static final int INDEX_BUCKET_ID     = 0;
@@ -80,7 +87,7 @@ public class ImageLang {
      */
     public static List<Dir> getImageDirs(Context context, final DirFilter dirFilter){
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-        Cursor mCursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, PROJECTION_BUCKET, null, null, orderBy + " DESC");
+        Cursor mCursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, PROJECTION_BUCKET_IMG, null, null, orderBy + " DESC");
         ArrayList<Dir> buffer = new ArrayList<Dir>();
         try {
             while (mCursor.moveToNext()) {
@@ -104,8 +111,8 @@ public class ImageLang {
     }
 
     public static List<Dir> getVedioDirs(Context context, final DirFilter dirFilter){
-        final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-        Cursor mCursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, PROJECTION_BUCKET, null, null, orderBy + " DESC");
+        final String orderBy = MediaStore.Video.Media.DATE_TAKEN;
+        Cursor mCursor = context.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, PROJECTION_BUCKET_VEDIO, null, null, orderBy + " DESC");
         ArrayList<Dir> buffer = new ArrayList<Dir>();
         try {
             while (mCursor.moveToNext()) {
@@ -172,5 +179,40 @@ public class ImageLang {
         return new ArrayList<>();
     }
 
+    public static List<MediaInfo> getVedios(Context context, String root, final ImageFilter imageFilter){
+        Cursor mImageCursor = null;
+        List<MediaInfo> list = new ArrayList<>();
+        try {
+            final String orderBy = MediaStore.Video.Media.DATE_TAKEN;
+            String bucket = root;
+            String searchParams = "bucket_display_name = \"" + bucket + "\"";
 
+            final String[] columns = { MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID };
+            if(root == null || root.equals("")){
+                mImageCursor = context.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy + " DESC");
+            }else{
+                mImageCursor = context.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, columns, searchParams, null, orderBy + " DESC");
+            }
+
+            if (mImageCursor.getCount() > 0) {
+                for (int i = 0; i < mImageCursor.getCount(); i++) {
+                    mImageCursor.moveToPosition(i);
+                    int dataColumnIndex = mImageCursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                    String path = mImageCursor.getString(dataColumnIndex).toString();
+                    MediaInfo img = new MediaInfo(path, false);
+                    if(imageFilter != null && imageFilter.access(img)){
+                        list.add(img);
+                    }
+                }
+            } else {
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mImageCursor.close();
+        }
+        return new ArrayList<>();
+    }
 }

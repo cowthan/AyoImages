@@ -18,9 +18,6 @@
 
 package com.learnncode.mediachooser.fragment;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -39,9 +36,14 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.learnncode.mediachooser.ImageLang;
 import com.learnncode.mediachooser.MediaChooserConstants;
 import com.learnncode.mediachooser.R;
 import com.learnncode.mediachooser.adapter.GridViewAdapter;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VideoFragment extends Fragment implements OnScrollListener {
 
@@ -53,7 +55,6 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 	private Cursor mCursor;
 	private int mDataColumnIndex;
 	private ArrayList<String> mSelectedItems = new ArrayList<String>();
-	private ArrayList<MediaModel> mGalleryModelList;
 	private View mView;
 	private OnVideoSelectedListener mCallback;
 
@@ -93,11 +94,7 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 
 			mVideoGridView = (GridView)mView.findViewById(R.id.gridViewFromMediaChooser);
 
-			if (getArguments() != null) {
-				initVideos(getArguments().getString("name"));
-			}else{
-				initVideos();
-			}
+			initPhoneImages();
 
 		}else{
 			((ViewGroup) mView.getParent()).removeView(mView);
@@ -109,21 +106,20 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 		return mView;
 	};
 
-
-	private void initVideos(String bucketName) {
-
-		try {
-			final String orderBy = MediaStore.Video.Media.DATE_TAKEN;
-			String searchParams = null;
-			searchParams = "bucket_display_name = \"" + bucketName + "\"";
-
-			final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Video.Media._ID};
-			mCursor = getActivity().getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, columns, searchParams, null, orderBy + " DESC");
-			setAdapter();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	private void initPhoneImages(){
+		String root = null;
+		if(getArguments() != null)  root = getArguments().getString("name");
+		imageList = ImageLang.getImages(getActivity(), root, new ImageLang.ImageFilter() {
+			@Override
+			public boolean access(ImageLang.MediaInfo image) {
+				return true;
+			}
+		});
+		setAdapter();
 	}
+
+	private List<ImageLang.MediaInfo> imageList;
+
 
 	public void initVideos() {
 
@@ -142,26 +138,14 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 	}
 
 	private void setAdapter() {
-		int count = mCursor.getCount();
 
-		if(count > 0){
-			mDataColumnIndex = mCursor.getColumnIndex(MEDIA_DATA);
-
-			//move position to first element
-			mCursor.moveToFirst();
-
-			mGalleryModelList = new ArrayList<MediaModel>();
-			for(int i= 0; i < count; i++) {
-				mCursor.moveToPosition(i);
-				String url = mCursor.getString(mDataColumnIndex);
-				mGalleryModelList.add(new MediaModel(url, false));
-			}
-
-
-			mVideoAdapter =  new GridViewAdapter(getActivity(), 0, mGalleryModelList, true,getArguments().getString("type"));
+		if(imageList != null && imageList.size() > 0){
+			mVideoAdapter =  new GridViewAdapter(getActivity(), 0, imageList, true,getArguments().getString("type"));
 			mVideoAdapter.videoFragment = this;
 			mVideoGridView.setAdapter(mVideoAdapter);
 			mVideoGridView.setOnScrollListener(this);
+
+
 		}else{
 			Toast.makeText(getActivity(), getActivity().getString(R.string.no_media_file_available), Toast.LENGTH_SHORT).show();
 
@@ -173,7 +157,7 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				GridViewAdapter adapter = (GridViewAdapter) parent.getAdapter();
-				MediaModel galleryModel = (MediaModel) adapter.getItem(position);
+				ImageLang.MediaInfo galleryModel = (ImageLang.MediaInfo) adapter.getItem(position);
 				File file = new File(galleryModel.url);
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setDataAndType(Uri.fromFile(file), "video/*");
@@ -188,7 +172,7 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// update the mStatus of each category in the adapter
 				GridViewAdapter adapter = (GridViewAdapter) parent.getAdapter();
-				MediaModel galleryModel = (MediaModel) adapter.getItem(position);
+				ImageLang.MediaInfo galleryModel = (ImageLang.MediaInfo) adapter.getItem(position);
 
 				if(! galleryModel.status){
 					long size = MediaChooserConstants.ChekcMediaFileSize(new File(galleryModel.url.toString()), true);
@@ -235,8 +219,8 @@ public class VideoFragment extends Fragment implements OnScrollListener {
 
 	public void addItem(String item) {
 		if(mVideoAdapter != null){
-			MediaModel model = new MediaModel(item, false);
-			mGalleryModelList.add(0, model);
+			ImageLang.MediaInfo model = new ImageLang.MediaInfo(item, false);
+			imageList.add(0, model);
 			mVideoAdapter.notifyDataSetChanged();
 		}else{
 			initVideos();
