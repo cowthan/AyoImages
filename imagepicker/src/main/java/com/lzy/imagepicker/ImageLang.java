@@ -1,4 +1,4 @@
-package com.learnncode.mediachooser;
+package com.lzy.imagepicker;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -42,7 +42,7 @@ public class ImageLang {
     private static final int INDEX_BUCKET_NAME   = 1;
     private static final int INDEX_BUCKET_URL    = 2;
 
-    public static class Dir  implements Serializable {
+    public static class Dir  implements Serializable{
         public String bucketName;
         public int bucketId;
         public String bucketUrl = null;
@@ -70,7 +70,7 @@ public class ImageLang {
         }
     }
 
-    public static class MediaInfo  implements Serializable{
+    public static class MediaInfo implements Serializable{
 
         public String url = null;
         public boolean status = false;
@@ -98,6 +98,8 @@ public class ImageLang {
             this.url = url;
             this.status = status;
         }
+        public MediaInfo() {
+        }
     }
 
     public interface DirFilter{
@@ -123,7 +125,8 @@ public class ImageLang {
             while (mCursor.moveToNext()) {
                 Dir entry = new Dir(
                         mCursor.getInt(INDEX_BUCKET_ID),
-                        mCursor.getString(INDEX_BUCKET_NAME),mCursor.getString(INDEX_BUCKET_URL));
+                        mCursor.getString(INDEX_BUCKET_NAME),
+                        mCursor.getString(INDEX_BUCKET_URL));
 
                 if (! buffer.contains(entry)) {
                     Log.i("bucket", entry.bucketName + "--" + entry.bucketUrl);
@@ -184,6 +187,7 @@ public class ImageLang {
 
             final String[] columns = {     //查询图片需要的数据列
                     MediaStore.Images.Media.DATA,           //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
+                    MediaStore.Images.Media._ID,
                     MediaStore.Images.Media.DISPLAY_NAME,   //图片的显示名称  aaa.jpg
                     MediaStore.Images.Media.SIZE,           //图片的大小，long型  132492
                     MediaStore.Images.Media.WIDTH,          //图片的宽度，int型  1920
@@ -203,8 +207,8 @@ public class ImageLang {
                     String path = mImageCursor.getString(mImageCursor.getColumnIndex(MediaStore.Images.Media.DATA)).toString();
                     MediaInfo img = new MediaInfo(path, false);
 
-                    String imageName = mImageCursor.getString(mImageCursor.getColumnIndexOrThrow(columns[1]));
-                    String imagePath = mImageCursor.getString(mImageCursor.getColumnIndexOrThrow(columns[0]));
+                    String imageName = mImageCursor.getString(mImageCursor.getColumnIndexOrThrow(columns[0]));
+                    String imagePath = mImageCursor.getString(mImageCursor.getColumnIndexOrThrow(columns[1]));
                     long imageSize = mImageCursor.getLong(mImageCursor.getColumnIndexOrThrow(columns[2]));
                     int imageWidth = mImageCursor.getInt(mImageCursor.getColumnIndexOrThrow(columns[3]));
                     int imageHeight = mImageCursor.getInt(mImageCursor.getColumnIndexOrThrow(columns[4]));
@@ -221,8 +225,6 @@ public class ImageLang {
                     if(imageFilter != null && imageFilter.access(img)){
                         list.add(img);
                     }
-
-                    Log.i("bucket", img.name + "--" + imagePath);
                 }
             } else {
 

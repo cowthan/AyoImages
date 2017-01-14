@@ -20,14 +20,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lzy.imagepicker.ImageLang;
 import com.lzy.imagepicker.ImagePicker;
-import com.lzy.imagepicker.bean.ImageItem;
 import com.lzy.imagepicker.ui.ImageGridActivity;
 import com.lzy.imagepicker.view.CropImageView;
 import com.lzy.imagepickerdemo.imageloader.GlideImageLoader;
-import com.lzy.imagepickerdemo.imageloader.PicassoImageLoader;
-import com.lzy.imagepickerdemo.imageloader.UILImageLoader;
-import com.lzy.imagepickerdemo.imageloader.XUtils3ImageLoader;
 import com.lzy.imagepickerdemo.wxdemo.WxDemoActivity;
 
 import java.util.ArrayList;
@@ -125,11 +122,11 @@ public class ImagePickerActivity extends AppCompatActivity implements SeekBar.On
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_open_gallery:
-                if (rb_uil.isChecked()) imagePicker.setImageLoader(new UILImageLoader());
+                if (rb_uil.isChecked()) imagePicker.setImageLoader(new GlideImageLoader());
                 else if (rb_glide.isChecked()) imagePicker.setImageLoader(new GlideImageLoader());
-                else if (rb_picasso.isChecked()) imagePicker.setImageLoader(new PicassoImageLoader());
+                else if (rb_picasso.isChecked()) imagePicker.setImageLoader(new GlideImageLoader());
                 else if (rb_fresco.isChecked()) imagePicker.setImageLoader(new GlideImageLoader());
-                else if (rb_xutils3.isChecked()) imagePicker.setImageLoader(new XUtils3ImageLoader());
+                else if (rb_xutils3.isChecked()) imagePicker.setImageLoader(new GlideImageLoader());
                 else if (rb_xutils.isChecked()) imagePicker.setImageLoader(new GlideImageLoader());
 
                 if (rb_single_select.isChecked()) imagePicker.setMultiMode(false);
@@ -197,7 +194,7 @@ public class ImagePickerActivity extends AppCompatActivity implements SeekBar.On
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == ImagePicker.RESULT_CODE_ITEMS) {
             if (data != null && requestCode == 100) {
-                ArrayList<ImageItem> images = (ArrayList<ImageItem>) data.getSerializableExtra(ImagePicker.EXTRA_RESULT_ITEMS);
+                ArrayList<ImageLang.MediaInfo> images = (ArrayList<ImageLang.MediaInfo>) data.getSerializableExtra(ImagePicker.EXTRA_RESULT_ITEMS);
                 MyAdapter adapter = new MyAdapter(images);
                 gridView.setAdapter(adapter);
             } else {
@@ -208,13 +205,13 @@ public class ImagePickerActivity extends AppCompatActivity implements SeekBar.On
 
     private class MyAdapter extends BaseAdapter {
 
-        private List<ImageItem> items;
+        private List<ImageLang.MediaInfo> items;
 
-        public MyAdapter(List<ImageItem> items) {
+        public MyAdapter(List<ImageLang.MediaInfo> items) {
             this.items = items;
         }
 
-        public void setData(List<ImageItem> items) {
+        public void setData(List<ImageLang.MediaInfo> items) {
             this.items = items;
             notifyDataSetChanged();
         }
@@ -225,7 +222,7 @@ public class ImagePickerActivity extends AppCompatActivity implements SeekBar.On
         }
 
         @Override
-        public ImageItem getItem(int position) {
+        public ImageLang.MediaInfo getItem(int position) {
             return items.get(position);
         }
 
@@ -246,7 +243,7 @@ public class ImagePickerActivity extends AppCompatActivity implements SeekBar.On
             } else {
                 imageView = (ImageView) convertView;
             }
-            imagePicker.getImageLoader().displayImage(ImagePickerActivity.this, getItem(position).path, imageView, size, size);
+            imagePicker.getImageLoader().displayImage(ImagePickerActivity.this, getItem(position).url, imageView, size, size);
             return imageView;
         }
     }

@@ -11,9 +11,9 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.lzy.imagepicker.ImageLang;
 import com.lzy.imagepicker.ImagePicker;
 import com.lzy.imagepicker.R;
-import com.lzy.imagepicker.bean.ImageItem;
 import com.lzy.imagepicker.view.SuperCheckBox;
 
 /**
@@ -57,29 +57,29 @@ public class ImagePreviewActivity extends ImagePreviewBaseActivity implements Im
 
         //初始化当前页面的状态
         onImageSelected(0, null, false);
-        ImageItem item = mImageItems.get(mCurrentPosition);
+        ImageLang.MediaInfo item = mImageItems.get(mCurrentPosition);
         boolean isSelected = imagePicker.isSelect(item);
-        mTitleCount.setText(getString(R.string.preview_image_count, mCurrentPosition + 1, mImageItems.size()));
+        mTitleCount.setText(getString(R.string.preview_image_count, ""+(mCurrentPosition + 1), mImageItems.size()+""));
         mCbCheck.setChecked(isSelected);
         //滑动ViewPager的时候，根据外界的数据改变当前的选中状态和当前的图片的位置描述文本
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 mCurrentPosition = position;
-                ImageItem item = mImageItems.get(mCurrentPosition);
+                ImageLang.MediaInfo item = mImageItems.get(mCurrentPosition);
                 boolean isSelected = imagePicker.isSelect(item);
                 mCbCheck.setChecked(isSelected);
-                mTitleCount.setText(getString(R.string.preview_image_count, mCurrentPosition + 1, mImageItems.size()));
+                mTitleCount.setText(getString(R.string.preview_image_count, ""+(mCurrentPosition + 1), mImageItems.size()+""));
             }
         });
         //当点击当前选中按钮的时候，需要根据当前的选中状态添加和移除图片
         mCbCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageItem imageItem = mImageItems.get(mCurrentPosition);
+                ImageLang.MediaInfo imageItem = mImageItems.get(mCurrentPosition);
                 int selectLimit = imagePicker.getSelectLimit();
                 if (mCbCheck.isChecked() && selectedImages.size() >= selectLimit) {
-                    Toast.makeText(ImagePreviewActivity.this, ImagePreviewActivity.this.getString(R.string.select_limit, selectLimit), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ImagePreviewActivity.this, ImagePreviewActivity.this.getString(R.string.select_limit, selectLimit+""), Toast.LENGTH_SHORT).show();
                     mCbCheck.setChecked(false);
                 } else {
                     imagePicker.addSelectedImageItem(mCurrentPosition, imageItem, mCbCheck.isChecked());
@@ -93,9 +93,9 @@ public class ImagePreviewActivity extends ImagePreviewBaseActivity implements Im
      * 当调用 addSelectedImageItem 或 deleteSelectedImageItem 都会触发当前回调
      */
     @Override
-    public void onImageSelected(int position, ImageItem item, boolean isAdd) {
+    public void onImageSelected(int position, ImageLang.MediaInfo item, boolean isAdd) {
         if (imagePicker.getSelectImageCount() > 0) {
-            mBtnOk.setText(getString(R.string.select_complete, imagePicker.getSelectImageCount(), imagePicker.getSelectLimit()));
+            mBtnOk.setText(getString(R.string.select_complete, imagePicker.getSelectImageCount()+"", imagePicker.getSelectLimit()+""));
             mBtnOk.setEnabled(true);
         } else {
             mBtnOk.setText(getString(R.string.complete));
@@ -104,7 +104,7 @@ public class ImagePreviewActivity extends ImagePreviewBaseActivity implements Im
 
         if (mCbOrigin.isChecked()) {
             long size = 0;
-            for (ImageItem imageItem : selectedImages)
+            for (ImageLang.MediaInfo imageItem : selectedImages)
                 size += imageItem.size;
             String fileSize = Formatter.formatFileSize(this, size);
             mCbOrigin.setText(getString(R.string.origin_size, fileSize));
@@ -142,7 +142,7 @@ public class ImagePreviewActivity extends ImagePreviewBaseActivity implements Im
         if (id == R.id.cb_origin) {
             if (isChecked) {
                 long size = 0;
-                for (ImageItem item : selectedImages)
+                for (ImageLang.MediaInfo item : selectedImages)
                     size += item.size;
                 String fileSize = Formatter.formatFileSize(this, size);
                 isOrigin = true;

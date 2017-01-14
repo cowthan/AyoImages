@@ -6,9 +6,9 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lzy.imagepicker.ImageLang;
 import com.lzy.imagepicker.ImagePicker;
 import com.lzy.imagepicker.Utils;
-import com.lzy.imagepicker.bean.ImageItem;
 
 import java.util.ArrayList;
 
@@ -29,11 +29,11 @@ public class ImagePageAdapter extends PagerAdapter {
     private int screenWidth;
     private int screenHeight;
     private ImagePicker imagePicker;
-    private ArrayList<ImageItem> images = new ArrayList<>();
+    private ArrayList<ImageLang.MediaInfo> images = new ArrayList<>();
     private Activity mActivity;
     public PhotoViewClickListener listener;
 
-    public ImagePageAdapter(Activity activity, ArrayList<ImageItem> images) {
+    public ImagePageAdapter(Activity activity, ArrayList<ImageLang.MediaInfo> images) {
         this.mActivity = activity;
         this.images = images;
 
@@ -43,7 +43,7 @@ public class ImagePageAdapter extends PagerAdapter {
         imagePicker = ImagePicker.getInstance();
     }
 
-    public void setData(ArrayList<ImageItem> images) {
+    public void setData(ArrayList<ImageLang.MediaInfo> images) {
         this.images = images;
     }
 
@@ -54,8 +54,8 @@ public class ImagePageAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         PhotoView photoView = new PhotoView(mActivity);
-        ImageItem imageItem = images.get(position);
-        imagePicker.getImageLoader().displayImage(mActivity, imageItem.path, photoView, screenWidth, screenHeight);
+        ImageLang.MediaInfo imageItem = images.get(position);
+        imagePicker.getImageLoader().displayImage(mActivity, imageItem.url, photoView, screenWidth, screenHeight);
         photoView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
             @Override
             public void onPhotoTap(View view, float x, float y) {

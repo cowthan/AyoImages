@@ -8,11 +8,10 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.lzy.imagepicker.ImageLang;
 import com.lzy.imagepicker.ImagePicker;
 import com.lzy.imagepicker.R;
-import com.lzy.imagepicker.bean.ImageItem;
 import com.lzy.imagepicker.view.CropImageView;
 
 import java.io.File;
@@ -34,7 +33,7 @@ public class ImageCropActivity extends ImageBaseActivity implements View.OnClick
     private boolean mIsSaveRectangle;
     private int mOutputX;
     private int mOutputY;
-    private ArrayList<ImageItem> mImageItems;
+    private ArrayList<ImageLang.MediaInfo> mImageItems;
     private ImagePicker imagePicker;
 
     @Override
@@ -59,7 +58,7 @@ public class ImageCropActivity extends ImageBaseActivity implements View.OnClick
         mOutputY = imagePicker.getOutPutY();
         mIsSaveRectangle = imagePicker.isSaveRectangle();
         mImageItems = imagePicker.getSelectedImages();
-        String imagePath = mImageItems.get(0).path;
+        String imagePath = mImageItems.get(0).url;
 
         mCropImageView.setFocusStyle(imagePicker.getStyle());
         mCropImageView.setFocusWidth(imagePicker.getFocusWidth());
@@ -109,8 +108,8 @@ public class ImageCropActivity extends ImageBaseActivity implements View.OnClick
 
         //裁剪后替换掉返回数据的内容，但是不要改变全局中的选中数据
         mImageItems.remove(0);
-        ImageItem imageItem = new ImageItem();
-        imageItem.path = file.getAbsolutePath();
+        ImageLang.MediaInfo imageItem = new ImageLang.MediaInfo();
+        imageItem.url = file.getAbsolutePath();
         mImageItems.add(imageItem);
 
         Intent intent = new Intent();

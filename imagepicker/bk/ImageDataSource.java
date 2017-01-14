@@ -9,7 +9,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
 import com.lzy.imagepicker.bean.ImageFolder;
-import com.lzy.imagepicker.bean.ImageItem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,11 +64,21 @@ public class ImageDataSource implements LoaderManager.LoaderCallbacks<Cursor> {
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader cursorLoader = null;
         //扫描所有图片
-        if (id == LOADER_ALL)
-            cursorLoader = new CursorLoader(activity, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION, null, null, IMAGE_PROJECTION[6] + " DESC");
-        //扫描某个图片文件夹
-        if (id == LOADER_CATEGORY)
-            cursorLoader = new CursorLoader(activity, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION, IMAGE_PROJECTION[1] + " like '%" + args.getString("path") + "%'", null, IMAGE_PROJECTION[6] + " DESC");
+//        if (id == LOADER_ALL)
+//            cursorLoader = new CursorLoader(activity, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION, null, null, IMAGE_PROJECTION[6] + " DESC");
+//        //扫描某个图片文件夹
+//        if (id == LOADER_CATEGORY)
+//            cursorLoader = new CursorLoader(activity, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION, IMAGE_PROJECTION[1] + " like '%" + args.getString("path") + "%'", null, IMAGE_PROJECTION[6] + " DESC");
+
+
+        final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
+        String bucket = args.containsKey("path") ? args.getString("path") : "";
+        String searchParams = "bucket_display_name = \"" + bucket + "\"";
+        if(id == LOADER_ALL){
+            cursorLoader = new CursorLoader(activity, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION, null, null, orderBy + " DESC");
+        }else{
+            cursorLoader = new CursorLoader(activity, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION, searchParams, null, orderBy + " DESC");
+        }
 
         return cursorLoader;
     }
@@ -78,7 +87,7 @@ public class ImageDataSource implements LoaderManager.LoaderCallbacks<Cursor> {
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         imageFolders.clear();
         if (data != null) {
-            ArrayList<ImageItem> allImages = new ArrayList<>();   //所有图片的集合,不分文件夹
+            ArrayList<ImageLang.MediaInfo> allImages = new ArrayList<>();   //所有图片的集合,不分文件夹
             while (data.moveToNext()) {
                 //查询数据
                 String imageName = data.getString(data.getColumnIndexOrThrow(IMAGE_PROJECTION[0]));
@@ -89,7 +98,7 @@ public class ImageDataSource implements LoaderManager.LoaderCallbacks<Cursor> {
                 String imageMimeType = data.getString(data.getColumnIndexOrThrow(IMAGE_PROJECTION[5]));
                 long imageAddTime = data.getLong(data.getColumnIndexOrThrow(IMAGE_PROJECTION[6]));
                 //封装实体
-                ImageItem imageItem = new ImageItem();
+                ImageLang.MediaInfo imageItem = new ImageLang.MediaInfo();
                 imageItem.name = imageName;
                 imageItem.path = imagePath;
                 imageItem.size = imageSize;
@@ -125,6 +134,8 @@ public class ImageDataSource implements LoaderManager.LoaderCallbacks<Cursor> {
                 allImagesFolder.images = allImages;
                 imageFolders.add(0, allImagesFolder);  //确保第一条是所有图片
             }
+        }else{
+            System.out.println("cursor是空");
         }
 
         //回调接口，通知图片数据准备完成

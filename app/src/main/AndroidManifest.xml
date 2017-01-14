@@ -131,6 +131,11 @@
         <activity android:name=".wxdemo.WxDemoActivity"/>
         <activity android:name=".PickerMediaChooser"/>
 
+        <activity android:name=".pick_enter.TimelineCreatePage_imagepicker"/>
+        <activity android:name=".pick_enter.TimelineCreatePage_mediachooser"/>
+        <activity android:name=".pick_enter.TimelineCreatePage_mediachooser_single"/>
+        <activity android:name=".pick_enter.TimelineCreatePage_mediachooser_single_crop"/>
+
         <activity
             android:name="com.lzy.imagepicker.ui.ImagePreviewDelActivity"
             android:theme="@style/ImagePickerThemeFullScreen"/>

@@ -13,16 +13,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.Toast;
 
-import com.lzy.imagepicker.ImageDataSource;
+import com.lzy.imagepicker.ImageLang;
 import com.lzy.imagepicker.ImagePicker;
 import com.lzy.imagepicker.R;
 import com.lzy.imagepicker.adapter.ImageFolderAdapter;
 import com.lzy.imagepicker.adapter.ImageGridAdapter;
 import com.lzy.imagepicker.bean.ImageFolder;
-import com.lzy.imagepicker.bean.ImageItem;
 import com.lzy.imagepicker.view.FolderPopUpWindow;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +36,7 @@ import java.util.List;
  * 修订历史：
  * ================================================
  */
-public class ImageGridActivity extends ImageBaseActivity implements ImageDataSource.OnImagesLoadedListener, ImageGridAdapter.OnImageItemClickListener, ImagePicker.OnImageSelectedListener, View.OnClickListener {
+public class ImageGridActivity extends ImageBaseActivity implements  ImageGridAdapter.OnImageItemClickListener, ImagePicker.OnImageSelectedListener, View.OnClickListener {
 
     public static final int REQUEST_PERMISSION_STORAGE = 0x01;
     public static final int REQUEST_PERMISSION_CAMERA = 0x02;
@@ -85,11 +87,21 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                new ImageDataSource(this, null, this);
+
+                List<ImageFolder> folders = loadImages();
+                onImagesLoaded(folders);
+                System.out.print("---aa---" + "checkPermission");
             } else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_STORAGE);
+                System.out.print("---aa---" + "checkPermission fail");
             }
+        }else{
+            List<ImageFolder> folders = loadImages();
+            onImagesLoaded(folders);
+            System.out.print("---aa---" + " no checkPermission");
         }
+
+
     }
 
     @Override
@@ -97,7 +109,8 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION_STORAGE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                new ImageDataSource(this, null, this);
+                List<ImageFolder> folders = loadImages();
+                onImagesLoaded(folders);
             } else {
                 showToast("权限被禁止，无法选择本地图片");
             }
@@ -173,7 +186,39 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
         mFolderPopupWindow.setMargin(mFooterBar.getHeight());
     }
 
-    @Override
+    private List<ImageFolder> loadImages(){
+        List<ImageLang.Dir> dirs = ImageLang.getImageDirs(this, new ImageLang.DirFilter() {
+            @Override
+            public boolean access(ImageLang.Dir dir) {
+                return true;
+            }
+        });
+
+        if(dirs == null || dirs.size() == 0){
+            Toast.makeText(this, "没有找到任何目录", Toast.LENGTH_SHORT).show();
+        }
+
+        List<ImageFolder> folders = new ArrayList<>();
+        for(ImageLang.Dir dir: dirs){
+            ImageFolder imageFolder = new ImageFolder();
+
+            List<ImageLang.MediaInfo> images = ImageLang.getImages(this, dir.bucketName, new ImageLang.ImageFilter() {
+                @Override
+                public boolean access(ImageLang.MediaInfo image) {
+                    return true;
+                }
+            });
+            imageFolder.cover = (images != null && images.size() > 0) ? images.get(0) : null;
+            imageFolder.images = images;
+            imageFolder.name = dir.bucketName;
+            imageFolder.path = dir.bucketUrl;
+            folders.add(imageFolder);
+
+            System.out.print("---aa---" + dir.bucketName);
+        }
+        return folders;
+    }
+
     public void onImagesLoaded(List<ImageFolder> imageFolders) {
         this.mImageFolders = imageFolders;
         imagePicker.setImageFolders(imageFolders);
@@ -185,13 +230,13 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
     }
 
     @Override
-    public void onImageItemClick(View view, ImageItem imageItem, int position) {
+    public void onImageItemClick(View view, ImageLang.MediaInfo imageItem, int position) {
         //根据是否有相机按钮确定位置
         position = imagePicker.isShowCamera() ? position - 1 : position;
         if (imagePicker.isMultiMode()) {
             Intent intent = new Intent(ImageGridActivity.this, ImagePreviewActivity.class);
             intent.putExtra(ImagePicker.EXTRA_SELECTED_IMAGE_POSITION, position);
-            intent.putExtra(ImagePicker.EXTRA_IMAGE_ITEMS, imagePicker.getCurrentImageFolderItems());
+            intent.putExtra(ImagePicker.EXTRA_IMAGE_ITEMS, (Serializable) imagePicker.getCurrentImageFolderItems());
             intent.putExtra(ImagePreviewActivity.ISORIGIN, isOrigin);
             startActivityForResult(intent, ImagePicker.REQUEST_CODE_PREVIEW);  //如果是多选，点击图片进入预览界面
         } else {
@@ -210,9 +255,9 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
     }
 
     @Override
-    public void onImageSelected(int position, ImageItem item, boolean isAdd) {
+    public void onImageSelected(int position, ImageLang.MediaInfo item, boolean isAdd) {
         if (imagePicker.getSelectImageCount() > 0) {
-            mBtnOk.setText(getString(R.string.select_complete, imagePicker.getSelectImageCount(), imagePicker.getSelectLimit()));
+            mBtnOk.setText(getString(R.string.select_complete, imagePicker.getSelectImageCount()+"", imagePicker.getSelectLimit()+""));
             mBtnOk.setEnabled(true);
             mBtnPre.setEnabled(true);
         } else {
@@ -220,7 +265,7 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
             mBtnOk.setEnabled(false);
             mBtnPre.setEnabled(false);
         }
-        mBtnPre.setText(getResources().getString(R.string.preview_count, imagePicker.getSelectImageCount()));
+        mBtnPre.setText(getResources().getString(R.string.preview_count, imagePicker.getSelectImageCount()+""));
         mImageGridAdapter.notifyDataSetChanged();
     }
 
@@ -246,8 +291,8 @@ public class ImageGridActivity extends ImageBaseActivity implements ImageDataSou
             if (resultCode == RESULT_OK && requestCode == ImagePicker.REQUEST_CODE_TAKE) {
                 //发送广播通知图片增加了
                 ImagePicker.galleryAddPic(this, imagePicker.getTakeImageFile());
-                ImageItem imageItem = new ImageItem();
-                imageItem.path = imagePicker.getTakeImageFile().getAbsolutePath();
+                ImageLang.MediaInfo imageItem = new ImageLang.MediaInfo();
+                imageItem.url = imagePicker.getTakeImageFile().getAbsolutePath();
                 imagePicker.clearSelectedImages();
                 imagePicker.addSelectedImageItem(0, imageItem, true);
                 if (imagePicker.isCrop()) {

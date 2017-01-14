@@ -9,7 +9,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 
 import com.lzy.imagepicker.bean.ImageFolder;
-import com.lzy.imagepicker.bean.ImageItem;
 import com.lzy.imagepicker.loader.ImageLoader;
 import com.lzy.imagepicker.view.CropImageView;
 
@@ -57,7 +56,7 @@ public class ImagePicker {
     private File takeImageFile;
     public Bitmap cropBitmap;
 
-    private ArrayList<ImageItem> mSelectedImages = new ArrayList<>();   //选中的图片集合
+    private ArrayList<ImageLang.MediaInfo> mSelectedImages = new ArrayList<>();   //选中的图片集合
     private List<ImageFolder> mImageFolders;      //所有的图片文件夹
     private int mCurrentImageFolderPosition = 0;  //当前选中的文件夹位置 0表示所有图片
     private List<OnImageSelectedListener> mImageSelectedListeners;          // 图片选中的监听回调
@@ -197,11 +196,11 @@ public class ImagePicker {
         mCurrentImageFolderPosition = mCurrentSelectedImageSetPosition;
     }
 
-    public ArrayList<ImageItem> getCurrentImageFolderItems() {
+    public List<ImageLang.MediaInfo> getCurrentImageFolderItems() {
         return mImageFolders.get(mCurrentImageFolderPosition).images;
     }
 
-    public boolean isSelect(ImageItem item) {
+    public boolean isSelect(ImageLang.MediaInfo item) {
         return mSelectedImages.contains(item);
     }
 
@@ -212,7 +211,7 @@ public class ImagePicker {
         return mSelectedImages.size();
     }
 
-    public ArrayList<ImageItem> getSelectedImages() {
+    public ArrayList<ImageLang.MediaInfo> getSelectedImages() {
         return mSelectedImages;
     }
 
@@ -273,7 +272,7 @@ public class ImagePicker {
 
     /** 图片选中的监听 */
     public interface OnImageSelectedListener {
-        void onImageSelected(int position, ImageItem item, boolean isAdd);
+        void onImageSelected(int position, ImageLang.MediaInfo item, boolean isAdd);
     }
 
     public void addOnImageSelectedListener(OnImageSelectedListener l) {
@@ -286,13 +285,13 @@ public class ImagePicker {
         mImageSelectedListeners.remove(l);
     }
 
-    public void addSelectedImageItem(int position, ImageItem item, boolean isAdd) {
+    public void addSelectedImageItem(int position, ImageLang.MediaInfo item, boolean isAdd) {
         if (isAdd) mSelectedImages.add(item);
         else mSelectedImages.remove(item);
         notifyImageSelectedChanged(position, item, isAdd);
     }
 
-    private void notifyImageSelectedChanged(int position, ImageItem item, boolean isAdd) {
+    private void notifyImageSelectedChanged(int position, ImageLang.MediaInfo item, boolean isAdd) {
         if (mImageSelectedListeners == null) return;
         for (OnImageSelectedListener l : mImageSelectedListeners) {
             l.onImageSelected(position, item, isAdd);

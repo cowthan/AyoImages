@@ -5,7 +5,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,18 +13,15 @@ import com.desmond.squarecamera.CameraActivity;
 import com.learnncode.mediachooser.MediaChooser;
 import com.learnncode.mediachooser.activity.DirectoryListActivity;
 
-import org.ayo.bitmap.BitmapUtils;
 import org.ayo.file.Files;
 import org.ayo.lang.Lang;
 import org.ayo.notify.actionsheet.ActionSheetDialog;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -320,62 +316,61 @@ public class ImagePickerDelegate {
             //log.i("downloader--", "不用压缩");
             return src;
         }
+        return src;
 
         ////取出exif--旋转信息
-        int exifOrientation = 0;
-        try {
-            ExifInterface exif = new ExifInterface(src);
-            exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String suffix = src.substring(src.lastIndexOf(".")+1);
-        String pathAfterCompress = "";
-        byte[] compressBitmap = BitmapUtils.compressBitmap(1000*1000, src);
-        if (null != compressBitmap) {
-            Bitmap bmPhoto = BitmapUtils
-                    .Bytes2Bimap(compressBitmap);
-            if (null != bmPhoto) {
-                String strTempPhotoPath;
-                try {
-                    strTempPhotoPath = BitmapUtils
-                            .saveFile(bmPhoto,
-                                    UUID.randomUUID()
-                                            + "." + suffix);
-                    if(bmPhoto != null){
-                        bmPhoto.recycle();
-                        bmPhoto = null;
-                    }
-                    if (null != strTempPhotoPath
-                            && !"".equals(strTempPhotoPath)) {
-                        pathAfterCompress = strTempPhotoPath;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        }
-        ///~~~压缩结束
-
-        if(pathAfterCompress != null && !pathAfterCompress.equals("")){
-
-//            Log.i("sfsfsfsfsdfsf", "考虑了旋转--压缩完路径--" + pathAfterCompress + "--" + exifOrientation);
-            if(exifOrientation != 0){
-                try {
-                    ExifInterface exif = new ExifInterface(pathAfterCompress);
-                    exif.setAttribute(ExifInterface.TAG_ORIENTATION, exifOrientation+"");
-                    exif.saveAttributes();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return pathAfterCompress;
-        }else{
-            return "";
-        }
+//        int exifOrientation = 0;
+//        try {
+//            ExifInterface exif = new ExifInterface(src);
+//            exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        String suffix = src.substring(src.lastIndexOf(".")+1);
+//        String pathAfterCompress = "";
+//        byte[] compressBitmap = BitmapUtils.compressBitmap(1000*1000, src);
+//        if (null != compressBitmap) {
+//            Bitmap bmPhoto = BitmapUtils
+//                    .Bytes2Bimap(compressBitmap);
+//            if (null != bmPhoto) {
+//                String strTempPhotoPath;
+//                try {
+//                    strTempPhotoPath = BitmapUtils
+//                            .saveFile(bmPhoto,
+//                                    UUID.randomUUID()
+//                                            + "." + suffix);
+//                    if(bmPhoto != null){
+//                        bmPhoto.recycle();
+//                        bmPhoto = null;
+//                    }
+//                    if (null != strTempPhotoPath
+//                            && !"".equals(strTempPhotoPath)) {
+//                        pathAfterCompress = strTempPhotoPath;
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//
+//            }
+//        }
+//        ///~~~压缩结束
+//
+//        if(pathAfterCompress != null && !pathAfterCompress.equals("")){
+//            if(exifOrientation != 0){
+//                try {
+//                    ExifInterface exif = new ExifInterface(pathAfterCompress);
+//                    exif.setAttribute(ExifInterface.TAG_ORIENTATION, exifOrientation+"");
+//                    exif.saveAttributes();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            return pathAfterCompress;
+//        }else{
+//            return "";
+//        }
     }
 
 

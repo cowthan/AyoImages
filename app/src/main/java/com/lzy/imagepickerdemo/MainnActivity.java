@@ -2,6 +2,11 @@ package com.lzy.imagepickerdemo;
 
 import android.os.Bundle;
 
+import com.lzy.imagepickerdemo.pick_enter.TimelineCreatePage_imagepicker;
+import com.lzy.imagepickerdemo.pick_enter.TimelineCreatePage_mediachooser;
+import com.lzy.imagepickerdemo.pick_enter.TimelineCreatePage_mediachooser_single;
+import com.lzy.imagepickerdemo.pick_enter.TimelineCreatePage_mediachooser_single_crop;
+
 import org.ayo.sample.menu.Leaf;
 import org.ayo.sample.menu.MainPagerActivity;
 import org.ayo.sample.menu.Menu;
@@ -73,8 +78,11 @@ public class MainnActivity extends MainPagerActivity {
             MenuItem menuItem = new MenuItem("相册", R.drawable.weixin_normal, R.drawable.weixin_pressed);
             m3.addMenuItem(menuItem);
             {
-                menuItem.addLeaf(new Leaf("MediaChooser风格", "", PickerMediaChooser.class, 1));
-                menuItem.addLeaf(new Leaf("ImagePicker风格", "", ImagePickerActivity.class, 1));
+                menuItem.addLeaf(new Leaf("MediaChooser风格--多选", "", TimelineCreatePage_mediachooser.class, 1));
+                menuItem.addLeaf(new Leaf("MediaChooser风格--单选", "", TimelineCreatePage_mediachooser_single.class, 1));
+                menuItem.addLeaf(new Leaf("MediaChooser风格--单选 + 系统crop", "", TimelineCreatePage_mediachooser_single_crop.class, 1));
+
+                menuItem.addLeaf(new Leaf("ImagePicker风格", "", TimelineCreatePage_imagepicker.class, 1));
             }
 
             menuItem = new MenuItem("相机", R.drawable.weixin_normal, R.drawable.weixin_pressed);
